@@ -365,6 +365,32 @@ export default (
 		}
 	}
 
+	 function getFileSize(filePath: string): number {
+	  let currentFileSize: number = 0;
+	  try {
+	    const { statSync, existsSync } = require('fs');
+	    if (existsSync) {
+	      const stats = statSync(filePath);
+	      currentFileSize = stats.size;
+	      return currentFileSize;
+	    }
+	  } catch (error) {
+	    console.error(`Error getting file size: ${error.message}`);
+	    return 0;
+	  }
+	}
+	
+	const resetFromFile = async (path: string): Promise<void> => {
+	  const { existsSync, unlinkSync, writeFileSync } = require('fs');
+	  if (existsSync(path)) {
+	    await unlinkSync(path);
+	
+	    console.log(`Store reset from file: ${path}`);
+	  } else {
+	    console.log(`File not found: ${path}`);
+	  }
+	}
+
 
 	return {
 		chats,
@@ -479,9 +505,17 @@ export default (
 		toJSON,
 		fromJSON,
 		writeToFile: (path: string) => {
-			// require fs here so that in case "fs" is not available -- the app does not crash
-			const { writeFileSync } = require('fs')
-			writeFileSync(path, JSON.stringify(toJSON()))
+			const { writeFileSync , existsSync} = require('fs');
+		            if (existsSync(path)) {
+		            const fileSize = getFileSize(path);
+		            if (fileSize > 10 * 1024 * 1024) {
+		            resetFromFile(path);
+		            } else {
+		            writeFileSync(path, JSON.stringify(toJSON()));
+		            }
+		            } else {
+		            writeFileSync(path, JSON.stringify(toJSON()));
+		        }
 		},
 		readFromFile: (path: string) => {
 			// require fs here so that in case "fs" is not available -- the app does not crash
