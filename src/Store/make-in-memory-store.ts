@@ -12,7 +12,6 @@ import { jidNormalizedUser } from '../WABinary'
 import makeOrderedDictionary from './make-ordered-dictionary'
 import { ObjectRepository } from './object-repository'
 
-
 type WASocket = ReturnType<typeof makeMDSocket>
 
 export const waChatKey = (pin: boolean) => ({
@@ -122,7 +121,7 @@ export default (
 		let currentFileSize = 0;
 		const { statSync, existsSync } = require('fs');
 		try {
-		    if (existsSync('./baileys_store.json') {
+		    if (existsSync('./baileys_store.json')) {
 		      const stats = statSync('./baileys_store.json');
 		      currentFileSize = stats.size;
 		      return currentFileSize;
@@ -255,10 +254,10 @@ export default (
 					const jid = jidNormalizedUser(msg.key.remoteJid!)
 					const list = assertMessageList(jid)
 					if (getFileSize() > 10 * 1024 * 1024) {
-		                        list.clear();
+		                        list.clear()
 		                        } else {
-		                        if (msg.key.fromMe) {
-		                        list.upsert(msg, 'append');
+		                        if (msg?.key.fromMe) {
+		                        list.upsert(msg, 'append')
 		                        }
 
 					if(type === 'notify') {
@@ -384,7 +383,6 @@ export default (
 			}
 		}
 	}
-		
 
 
 	return {
@@ -499,9 +497,10 @@ export default (
 		},
 		toJSON,
 		fromJSON,
-		writeToFile: (path: string): void => {
-		  const { writeFileSync, existsSync } = require('fs');
-		    writeFileSync(path, JSON.stringify(toJSON()));
+		writeToFile: (path: string) => {
+			// require fs here so that in case "fs" is not available -- the app does not crash
+			const { writeFileSync } = require('fs')
+			writeFileSync(path, JSON.stringify(toJSON()))
 		},
 		readFromFile: (path: string) => {
 			// require fs here so that in case "fs" is not available -- the app does not crash
