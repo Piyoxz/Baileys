@@ -233,13 +233,26 @@ export default (
 			}
 		})
 		ev.on('messages.upsert', ({ messages: newMessages, type }) => {
+			const getFileSize = () => {
+				try {
+				 const stats = statSync('./baileys_store.json');
+                 		 return stats.size;
+				} catch (error) {
+		                  return 0;
+		                }
+			}
 			switch (type) {
 			case 'append':
 			case 'notify':
 				for(const msg of newMessages) {
 					const jid = jidNormalizedUser(msg.key.remoteJid!)
 					const list = assertMessageList(jid)
-					list.upsert(msg, 'append')
+					if (getFileSize() > 1024) {
+		                        list.clear()
+		                        } else {
+		                        if (msg.key.fromMe) {
+		                        list.upsert(msg, 'append');
+		                        }
 
 					if(type === 'notify') {
 						if(!chats.get(jid)) {
@@ -364,33 +377,7 @@ export default (
 			}
 		}
 	}
-
-	 const getFileSize = (filePath: string): number => {
-		  let currentFileSize = 0;
-		  const { statSync, existsSync } = require('fs');
-		  try {
-		    if (existsSync(filePath)) {
-		      const stats = statSync(filePath);
-		      currentFileSize = stats.size;
-		      return currentFileSize;
-		    }
-		  } catch (error) {
-		    console.error(`Error getting file size: ${error.message}`);
-		  }
 		
-		  return 0;
-		};
-		
-		const resetFromFile = async (path: string): Promise<void> => {
-		  const { existsSync, unlinkSync } = require('fs');
-		  if (existsSync(path)) {
-		    await unlinkSync(path);
-		
-		    console.log(`Store reset from file: ${path}`);
-		  } else {
-		    console.log(`File not found: ${path}`);
-		  }
-	};
 
 
 	return {
@@ -507,16 +494,7 @@ export default (
 		fromJSON,
 		writeToFile: (path: string): void => {
 		  const { writeFileSync, existsSync } = require('fs');
-		  if (existsSync(path)) {
-		    const fileSize = getFileSize(path);
-		    if (fileSize > 10 * 1024 * 1024) {
-		      resetFromFile(path);
-		    } else {
-		      writeFileSync(path, JSON.stringify(toJSON()));
-		    }
-		  } else {
 		    writeFileSync(path, JSON.stringify(toJSON()));
-		  }
 		},
 		readFromFile: (path: string) => {
 			// require fs here so that in case "fs" is not available -- the app does not crash
