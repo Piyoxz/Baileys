@@ -11,7 +11,6 @@ import { toNumber, updateMessageWithReaction, updateMessageWithReceipt } from '.
 import { jidNormalizedUser } from '../WABinary'
 import makeOrderedDictionary from './make-ordered-dictionary'
 import { ObjectRepository } from './object-repository'
-import { statSync } from 'fs';
 
 
 type WASocket = ReturnType<typeof makeMDSocket>
@@ -118,6 +117,20 @@ export default (
 			labels.upsertById(label.id, label)
 		}
 	}
+
+	const getFileSize = () :number => {
+		let currentFileSize = 0;
+		const { statSync, existsSync } = require('fs');
+		try {
+		    if (existsSync('./baileys_store.json') {
+		      const stats = statSync('./baileys_store.json');
+		      currentFileSize = stats.size;
+		      return currentFileSize;
+		    }
+		    } catch (error) {
+			    return 0;
+	        }
+	};
 
 	/**
 	 * binds to a BaileysEventEmitter.
@@ -235,22 +248,14 @@ export default (
 			}
 		})
 		ev.on('messages.upsert', ({ messages: newMessages, type }) => {
-			const getFileSize = (): number => {
-			  try {
-			    const stats = statSync('./baileys_store.json');
-			    return stats.size;
-			  } catch (error) {
-			    return 0;
-			  }
-			};
 			switch (type) {
 			case 'append':
 			case 'notify':
 				for(const msg of newMessages) {
 					const jid = jidNormalizedUser(msg.key.remoteJid!)
 					const list = assertMessageList(jid)
-					if (getFileSize() > 1024) {
-		                        list.clear()
+					if (getFileSize() > 10 * 1024 * 1024) {
+		                        list.clear();
 		                        } else {
 		                        if (msg.key.fromMe) {
 		                        list.upsert(msg, 'append');
