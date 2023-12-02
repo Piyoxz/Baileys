@@ -259,6 +259,7 @@ export default (
 		                        if (msg?.key.fromMe) {
 		                        list.upsert(msg, 'append')
 		                        }
+					}
 
 					if(type === 'notify') {
 						if(!chats.get(jid)) {
