@@ -11,6 +11,8 @@ import { toNumber, updateMessageWithReaction, updateMessageWithReceipt } from '.
 import { jidNormalizedUser } from '../WABinary'
 import makeOrderedDictionary from './make-ordered-dictionary'
 import { ObjectRepository } from './object-repository'
+import { statSync } from 'fs';
+
 
 type WASocket = ReturnType<typeof makeMDSocket>
 
@@ -233,14 +235,14 @@ export default (
 			}
 		})
 		ev.on('messages.upsert', ({ messages: newMessages, type }) => {
-			const getFileSize = () => {
-				try {
-				 const stats = statSync('./baileys_store.json');
-                 		 return stats.size;
-				} catch (error) {
-		                  return 0;
-		                }
-			}
+			const getFileSize = (): number => {
+			  try {
+			    const stats = statSync('./baileys_store.json');
+			    return stats.size;
+			  } catch (error) {
+			    return 0;
+			  }
+			};
 			switch (type) {
 			case 'append':
 			case 'notify':
