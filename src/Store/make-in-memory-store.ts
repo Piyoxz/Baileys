@@ -126,11 +126,9 @@ export default (
 		      const stats = statSync(filePath);
 		      return stats.size;
 		    } catch (error) {
-		      console.error(`Error getting file stats: ${error.message}`);
 		      return 0;
 		    }
 		  } else {
-		    console.error(`File does not exist: ${filePath}`);
 		    return 0;
 		  }
 	};
