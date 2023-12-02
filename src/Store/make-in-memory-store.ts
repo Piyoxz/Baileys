@@ -1,6 +1,7 @@
 import type KeyedDB from '@adiwajshing/keyed-db'
 import type { Comparable } from '@adiwajshing/keyed-db/lib/Types'
 import type { Logger } from 'pino'
+import type { statSync, existsSync } from 'fs';
 import { proto } from '../../WAProto'
 import { DEFAULT_CONNECTION_CONFIG } from '../Defaults'
 import type makeMDSocket from '../Socket'
@@ -118,17 +119,20 @@ export default (
 	}
 
 	const getFileSize = () :number => {
-		let currentFileSize = 0;
-		const { statSync, existsSync } = require('fs');
-		try {
-		    if (existsSync('./baileys_store.json')) {
-		      const stats = statSync('./baileys_store.json');
-		      currentFileSize = stats.size;
-		      return currentFileSize;
-		    }
+		const filePath = './baileys_store.json';
+
+		  if (existsSync(filePath)) {
+		    try {
+		      const stats = statSync(filePath);
+		      return stats.size;
 		    } catch (error) {
-			    return 0;
-	        }
+		      console.error(`Error getting file stats: ${error.message}`);
+		      return 0;
+		    }
+		  } else {
+		    console.error(`File does not exist: ${filePath}`);
+		    return 0;
+		  }
 	};
 
 	/**
@@ -505,7 +509,6 @@ export default (
 		},
 		readFromFile: (path: string) => {
 			// require fs here so that in case "fs" is not available -- the app does not crash
-			const { readFileSync, existsSync } = require('fs')
 			if(existsSync(path)) {
 				logger.debug({ path }, 'reading from file')
 				const jsonStr = readFileSync(path, { encoding: 'utf-8' })
