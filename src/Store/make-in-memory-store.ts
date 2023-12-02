@@ -1,7 +1,7 @@
 import type KeyedDB from '@adiwajshing/keyed-db'
 import type { Comparable } from '@adiwajshing/keyed-db/lib/Types'
 import type { Logger } from 'pino'
-import { statSync, existsSync , writeFileSync } from 'fs';
+import { statSync, existsSync , writeFileSync , readFileSync } from 'fs';
 import { proto } from '../../WAProto'
 import { DEFAULT_CONNECTION_CONFIG } from '../Defaults'
 import type makeMDSocket from '../Socket'
